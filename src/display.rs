@@ -4,7 +4,7 @@ use crossterm::*;
 use crate::color::*;
 use crate::color::Color::*;
 use crate::display::FillMode::*;
-use crate::map::{Map};
+use crate::map::{Map, V2};
 use crate::object::Object;
 
 pub struct Display{
@@ -33,20 +33,20 @@ impl Display{
         self.screen = text.chars().map(|c| c.to_string()).collect();
     }
 
-    pub fn draw(&mut self, fill_mode: FillMode, char_: char, color: &Color) {
-        let color_ = get_color(color);
+    pub fn draw(&mut self, fill_mode: FillMode, pos_camera: &V2) {
+
         match fill_mode {
-            Line(x1,y1,x2,y2) => {
+            Line(x1,y1,x2,y2, c, col) => {
                 let mut x = x1 as i32;
                 let mut y = y1 as i32;
-                let dx= (x2 as i32 - x1 as i32).abs();
-                let dy= (y2 as i32 - y1 as i32).abs();
+                let dx= (x2 - x1).abs();
+                let dy= (y2 - y1).abs();
                 let sx: i32 = if x1 < x2 { 1 } else { -1 };
                 let sy: i32 = if y1 < y2 { 1 } else { -1 };
                 let mut err = dx - dy;
 
                 loop {
-                    self.draw(Point(x as u16, y as u16), char_, color);
+                    self.draw(Point(x, y, c, col.clone()), pos_camera);
 
                     if x == x2.into() && y == y2.into() { break; }
 
@@ -61,9 +61,24 @@ impl Display{
                     }
                 }
             },
-            Point(x1,y1) => {
-                let p = {self.size_xy.0 * y1 + x1} as usize;
-                self.screen[p] = format!("{}{}{}", color_, char_, get_color(&Reset));
+            Point(x1,y1, c, col) => {
+                if min_max_v2(0, self.size_xy , pos_camera ) { return; }
+                let color_ = get_color(&col);
+                let p = {self.size_xy.0 as i32 * y1 + x1} as usize;
+
+                self.screen[p] = format!("{}{}{}", color_, c, get_color(&Reset));
+            }
+            Model(m) => {
+                let mut i = (-1,-1);
+                for char in m.skin.chars.iter() {
+                    i.0+=1;
+                    if char.clone() == '*' { i.1+=1; i.0 = -1; continue; }
+                    let pos = pos_camera.clone() + V2(i.0, i.1);
+                    if min_max_v2(0, self.size_xy, &pos) { continue; }
+                    let p = {self.size_xy.0 * (pos_camera.1 + i.1) as u16 + (pos_camera.0  + i.0) as u16} as usize;
+                    self.screen[p] = format!("{}{}{}", get_color(&m.skin.color[i.0 as usize]), char, get_color(&Reset));
+
+                }
             }
         }
         io::stdout().flush().unwrap();
@@ -79,8 +94,7 @@ impl Display{
         self.fill(&' ');
         for b in map.0.iter() {
             let pos = &b.pos - &camera.pos;
-            if pos.0 < 0 || pos.1 < 0 || pos.0 > self.size_xy.0 as i32 - 1 || pos.1 > self.size_xy.1 as i32 -1  { continue; }
-            self.draw(Point(pos.0 as u16, pos.1 as u16), b.skin, &b.color);
+            self.draw(Model(b.clone()), &pos);
         }
         self.show();
     }
@@ -90,10 +104,16 @@ fn set_mouse_pos(x:u16, y:u16){
     io::stdout().flush().unwrap();
 }
 
+fn min_max_v2(min: i32, max: (u16, u16), value: &V2) -> bool{
+    if value.0 < min || value.0 > max.0 as i32 - 1  || value.1 < min || value.1 > max.1 as i32 - 1 { return true }
+    false
+}
+
 #[derive(Debug)]
 pub enum FillMode{
-    Line(u16,u16,u16,u16),
-    Point(u16,u16),
+    Line(i32,i32,i32,i32, char, Color),
+    Point(i32,i32, char, Color),
+    Model(Object)
 }
 
 
