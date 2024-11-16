@@ -1,0 +1,1 @@
+pub fn gen(max: f64) -> f64 { rand::random::<f64>() * max }
