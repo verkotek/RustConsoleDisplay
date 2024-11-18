@@ -1,5 +1,5 @@
 use crate::color::Color;
-use crate::map::V2;
+use crate::position::V2;
 
 #[derive(Debug, Clone)]
 pub struct Object{

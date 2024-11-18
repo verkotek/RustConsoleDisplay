@@ -4,7 +4,8 @@ use crossterm::*;
 use crate::color::*;
 use crate::color::Color::*;
 use crate::display::FillMode::*;
-use crate::map::{Map, V2};
+use crate::map::Map;
+use crate::position::V2;
 use crate::model::object::Object;
 
 pub struct Display{

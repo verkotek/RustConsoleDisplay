@@ -1,6 +1,6 @@
 use crate::color::Color::*;
-use crate::map::V2;
 use crate::model::object::Object;
+use crate::position::V2;
 
 pub fn load_model() -> Vec<Object>{
     list()

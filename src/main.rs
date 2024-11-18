@@ -4,6 +4,7 @@ mod color;
 mod map;
 mod model;
 mod chunk;
+mod position;
 
 use std::io::{self, Write};
 use crossterm::event::*;
