@@ -2,43 +2,21 @@ mod display;
 mod rng;
 mod color;
 mod map;
-mod object;
+mod model;
+mod chunk;
 
 use std::io::{self, Write};
 use crossterm::event::*;
 use crossterm::*;
 use crate::color::Color::*;
 use crate::display::{Display};
-use crate::map::{Map, V2};
-use crate::object::Object;
+use crate::map::{Map};
+use crate::model::list::load_model;
+use crate::model::object::Object;
 
 fn main() {
-    let home = Object::from(
-        "\
-WALLLL*\
-w    l*\
-W    l*\
-WALLLL".to_string(),
-        Red,
-        V2(rng::gen(300.0) as i32-50, rng::gen(100.0) as i32-50)
-    );
-    let big_home = Object::from(
-        "\
-HHHHHHHHHHHH*\
-H           *\
-H          H*\
-HHH  HHHHHHH*\
-H    H*\
-H    H*\
-H    H*\
-H    H*\
-HHHHHH".to_string(),
-        Red,
-        V2(rng::gen(300.0) as i32-50, rng::gen(100.0) as i32-50)
-    );
+    let list_model = load_model();
 
-
-    let mut _mouse_pos = 1;
     let size = terminal::size().unwrap();
     let _size_line = (size.0 * size.1) as usize;
     //
@@ -50,21 +28,32 @@ HHHHHH".to_string(),
 
 
     let varied = [Red, Yellow, Green, Blue];
-    for _i in 0..1000 {
+    for _ in 0..10000 {
         map.0.push(Object::from(
             "@".to_string(),
             varied[rng::gen(varied.len() as f64) as usize].clone(),
-            V2(rng::gen(500.0) as i32-250, rng::gen(500.0) as i32-250))
+            rng::gen_v2(500.0,500.0))
         );
     }
-    for _i in 0..50 {
-        map.0.push(Object::from(home.skin.chars.iter().collect(), varied[rng::gen(varied.len() as f64) as usize].clone(), V2(rng::gen(500.0) as i32-250, rng::gen(500.0) as i32-250)));
-        map.0.push(
-            Object::from(big_home.skin.chars.iter().collect(),
-                         varied[rng::gen(varied.len() as f64) as usize].clone(),
-                         V2(rng::gen(50.0) as i32, rng::gen(50.0) as i32)));
+    for _ in 0..50 {
+        map.0.push(Object::create(
+            &list_model[0],
+            varied[rng::gen(varied.len() as f64) as usize].clone(),
+            rng::gen_v2(500.0,500.0))
+        );
+        map.0.push(Object::create(
+            &list_model[1],
+            varied[rng::gen(varied.len() as f64) as usize].clone(),
+            rng::gen_v2(500.0,500.0))
+        );
     }
-
+    for _ in 0..10 {
+        map.0.push(Object::create(
+            &list_model[2],
+            varied[rng::gen(varied.len() as f64) as usize].clone(),
+            rng::gen_v2(500.0,500.0))
+        );
+    }
 
 
 
@@ -79,12 +68,7 @@ HHHHHH".to_string(),
             'd' => {cam.pos.0 += 1;}
             _ => {}
         }
-        // if c == '`' { _mouse_pos = (rand::random::<f64>() * (size.1-1) as f64) as usize }
-        // if c == 'q' { break; }
-
         dis.show_map(&map, &cam);
-
-
         io::stdout().flush().unwrap();
     }
 

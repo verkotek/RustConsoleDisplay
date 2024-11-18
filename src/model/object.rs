@@ -28,6 +28,12 @@ impl Object{
             pos
         }
     }
+    pub fn create(object: &Object, color: Color, v2: V2) -> Object{
+        let mut obj = object.clone();
+        obj.skin.color = vec![color; obj.skin.chars.len()];
+        obj.pos = v2;
+        obj
+    }
 }
 
 #[derive(Debug, Clone)]

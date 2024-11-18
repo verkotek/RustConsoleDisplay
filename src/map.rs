@@ -1,5 +1,5 @@
 use std::ops::{Add, Sub};
-use crate::object::Object;
+use crate::model::object::Object;
 
 pub struct Map(pub Vec<Object>);
 

@@ -5,7 +5,7 @@ use crate::color::*;
 use crate::color::Color::*;
 use crate::display::FillMode::*;
 use crate::map::{Map, V2};
-use crate::object::Object;
+use crate::model::object::Object;
 
 pub struct Display{
     size_xy:(u16,u16),
@@ -72,7 +72,7 @@ impl Display{
                 let mut i = (-1,-1);
                 for char in m.skin.chars.iter() {
                     i.0+=1;
-                    if char.clone() == '*' { i.1+=1; i.0 = -1; continue; }
+                    if char == &'*' { i.1+=1; i.0 = -1; continue; }
                     let pos = pos_camera.clone() + V2(i.0, i.1);
                     if min_max_v2(0, self.size_xy, &pos) { continue; }
                     let p = {self.size_xy.0 * (pos_camera.1 + i.1) as u16 + (pos_camera.0  + i.0) as u16} as usize;
