@@ -1,6 +1,6 @@
-use std::ops::{Add, AddAssign, Sub};
+use std::ops::{Add, AddAssign, Mul, Sub};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash, Eq)]
 pub struct V2(pub i32, pub i32);
 
 impl Sub for V2 {
@@ -35,5 +35,12 @@ impl AddAssign<(u16, u16)> for V2 {
     fn add_assign(&mut self, rhs: (u16, u16)) {
         self.0 += rhs.0 as i32;
         self.1 += rhs.1 as i32;
+    }
+}
+impl Mul<V2> for V2 {
+    type Output = V2;
+
+    fn mul(self, rhs: V2) -> Self::Output {
+        V2(self.0 * rhs.0, self.1 * rhs.1)
     }
 }

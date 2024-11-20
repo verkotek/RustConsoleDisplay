@@ -1,32 +1,67 @@
-use core::array;
+use std::collections::HashMap;
+use rand::seq::SliceRandom;
 use crate::chunk::Chunk;
+use crate::color::Color::*;
 use crate::model::object::Object;
 use crate::position::V2;
+use crate::{chunk, settings};
+use crate::display::camera_pos_center;
+use crate::settings::SIZE;
 
-const SIZE: (i32, i32) = (7, 3);
-const LIST: usize = 900;
-const CUBE: i32 = 30;
-// 3^2 = 9
-pub struct Map(pub [Chunk; LIST]);
-// size 32
+pub struct Map {
+    hash_map: HashMap<V2,Chunk>,
+}
 impl Map{
-    pub fn new() -> Box<Self> {
-        let mut ch = Chunk{list: vec![], pos: V2(0,0)};
-        let a = array::from_fn::<Chunk,LIST,_>(|i| {let mut a = ch.clone(); a.pos = V2(i as i32 % CUBE, i as i32 / CUBE); a});
-        Box::new(Map(a))
+    pub fn new() -> Self {
+        Map{
+            hash_map: HashMap::new()
+        }
     }
 
-    pub fn installation_object(&mut self, object: Object) -> &mut Map {
-        let pos = pos_on_chunk(&object); //V2(object.pos.0 / SIZE, object.pos.1 / SIZE);
-        if pos.0 >= CUBE || pos.1 >= CUBE { return self;  }
-        let pos = (pos.0 + pos.1 * CUBE) as usize;
-        // if pos >= self.0.len() { return self }
-
-        self.0[pos].list.push(object);
-        self
+    pub fn get_map(&self) -> &HashMap<V2,Chunk>{
+        &self.hash_map
     }
+
+    pub fn get_chunk(&mut self, pos: &V2) -> Option<&mut Chunk> {
+        self.hash_map.get_mut(pos)
+    }
+
+    pub fn update_chunks(&mut self, pos_cam: &V2){
+        let visible = visible_chucks(pos_cam);
+
+        self.hash_map.retain(|p, _| visible.contains(p));
+
+        let mut rng = rand::thread_rng();
+        let varied = [Red, Yellow, Green, Blue];
+        let mut c = Chunk::new();
+        c.list.push(Object::from(
+            "@".to_string(),
+            Red,
+            V2(0,0)
+        ));
+
+
+        for pos in visible {
+            if !self.hash_map.contains_key(&pos) {
+                c.pos = pos.clone();
+                c.list[0].skin.color[0] = varied.choose(&mut rng).unwrap().clone();
+                c.list[0].pos = c.pos.clone();
+                self.hash_map.insert(pos, c.clone());
+            }
+        }
+    }
+
 }
 
-pub fn pos_on_chunk(object: &Object) -> V2{
-    V2(object.pos.0 / SIZE.0, object.pos.1 / SIZE.1)
+fn visible_chucks(pos: &V2) -> Vec<V2> {
+    let mut chunk = Vec::new();
+    let r = settings::CHUNK_RADIUS;
+    for x in -r..=r {
+        for y in -r..=r {
+            chunk.push(  (chunk::pos_on_chunk(&camera_pos_center(&pos)) + V2(x,y))*SIZE)
+        }
+    }
+    chunk
 }
+
+

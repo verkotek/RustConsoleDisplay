@@ -1,12 +1,10 @@
 use std::io::{self, Write};
-use std::ops::AddAssign;
 use std::string::ToString;
 use crossterm::*;
-use crate::chunk::Chunk;
 use crate::color::*;
 use crate::color::Color::*;
 use crate::display::FillMode::*;
-use crate::map::{Map, pos_on_chunk};
+use crate::map::{Map};
 use crate::position::V2;
 use crate::model::object::Object;
 
@@ -89,7 +87,7 @@ impl Display{
         io::stdout().flush().unwrap();
     }
 
-    pub fn show(&self){
+    fn show(&self){
         let text: String = self.screen.join("");
         set_mouse_pos(0,0);
         print!("{}",text);
@@ -97,10 +95,7 @@ impl Display{
 
     pub fn show_map(&mut self, map: &Map, camera: &Object){
         self.fill(&' ');
-        for ch in map.0.iter() {
-
-            if camera_size(&camera, &ch)  { continue }
-
+        for ch in map.get_map().values() {
             for object in ch.list.iter() {
                 let pos = &object.pos - &camera.pos;
                 self.draw(Model(object.clone()), &pos);
@@ -119,16 +114,12 @@ fn min_max_v2(min: i32, max: (u16, u16), value: &V2) -> bool{
     false
 }
 
-fn camera_size(camera: &Object, chunk: &Chunk) -> bool{
-    let mut  obj = camera.clone();
+pub fn camera_pos_center(camera: &V2) -> V2{
+    let mut pos = camera.clone();
     let mut size =terminal::size().unwrap();
     size.0 /= 2; size.1 /= 2;
-    obj.pos += size;
-
-    let pos_cam = pos_on_chunk(&obj);
-    let dist = (((chunk.pos.0 - pos_cam.0).pow(2)+(chunk.pos.1 - pos_cam.1).pow(2)) as f64).sqrt();
-    if dist < 5.0 { return false }
-    true
+    pos += size;
+    pos
 }
 
 #[derive(Debug)]

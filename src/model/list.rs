@@ -5,7 +5,6 @@ use crate::position::V2;
 pub fn load_model() -> Vec<Object>{
     list()
 }
-
 fn list() -> Vec<Object> {
     let mut list = Vec::new();
     list.push(Object::from(
