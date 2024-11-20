@@ -7,6 +7,7 @@ mod chunk;
 mod position;
 
 use std::io::{self, Write};
+use std::usize;
 use crossterm::event::*;
 use crossterm::*;
 use crate::color::Color::*;
@@ -26,32 +27,40 @@ fn main() {
     let mut dis = Display::new();
     let mut map = Map::new();
 
-
+    // map.installation_object(Object::create(
+    //             &list_model[2],
+    //             Red,
+    //             V2(31,31))
+    // ).installation_object(Object::create(
+    //     &list_model[2],
+    //     Green,
+    //     V2(40,10))
+    // );
 
     let varied = [Red, Yellow, Green, Blue];
     for _ in 0..10000 {
-        map.0.push(Object::from(
+        map.installation_object(Object::from(
             "@".to_string(),
-            varied[rng::gen(varied.len() as f64) as usize].clone(),
-            rng::gen_v2(500.0,500.0))
+            varied[rng::gen(1usize, varied.len() as f64)].clone(),
+            rng::gen_v2(200.0,200.0))
         );
     }
     for _ in 0..50 {
-        map.0.push(Object::create(
+        map.installation_object(Object::create(
             &list_model[0],
-            varied[rng::gen(varied.len() as f64) as usize].clone(),
+            varied[rng::gen(1usize, varied.len() as f64)].clone(),
             rng::gen_v2(500.0,500.0))
         );
-        map.0.push(Object::create(
+        map.installation_object(Object::create(
             &list_model[1],
-            varied[rng::gen(varied.len() as f64) as usize].clone(),
+            varied[rng::gen(1usize, varied.len() as f64)].clone(),
             rng::gen_v2(500.0,500.0))
         );
     }
     for _ in 0..10 {
-        map.0.push(Object::create(
+        map.installation_object(Object::create(
             &list_model[2],
-            varied[rng::gen(varied.len() as f64) as usize].clone(),
+            varied[rng::gen(1usize, varied.len() as f64)].clone(),
             rng::gen_v2(500.0,500.0))
         );
     }
