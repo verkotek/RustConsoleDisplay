@@ -10,7 +10,6 @@ impl Sub for V2 {
         V2(self.0 - rhs.0, self.1 - rhs.1)
     }
 }
-
 impl Sub for &V2 {
     type Output = V2;
 

@@ -15,7 +15,7 @@ pub struct Game{
 impl Game{
     pub fn new() -> Self{
         let mut camera =Object::new();
-        camera.pos = V2(0,4);
+        camera.pos = V2(0,0);
         Game{
             display: Display::new(),
             map: Map::new(),
@@ -36,10 +36,6 @@ impl Game{
 
     pub fn update(&mut self, f: fn(&mut Game) -> bool){
         loop {
-            // match f(self) {
-            //     0 => {break}
-            //     _ => {}
-            // }
             if !f(self) { break; }
         }
     }
